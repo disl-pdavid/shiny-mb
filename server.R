@@ -34,28 +34,40 @@ function(input, output, session) {
   
   #Watch for changes in Variable and Color By and redraw the map
   observe({
+    
     #Define plot variables based on temperature or salinity
     if(input$var == "Temperature"){ 
+      
        df <- mb_stations %>% select(Station,Lat,Lon,ID)
+       
        #Get values for surface or bottom
        if(input$colorby == "Surface") df$varmean <- mb_stations$Tsm
        if(input$colorby == "Bottom") df$varmean <- mb_stations$Tbm
+       
        #Maps data values to colors using inferno pallete
        pal <- colorNumeric(palette = "inferno", domain = c(21,25))
+       
        #For the legend
        groupname <- paste("Mean",input$colorby,"Temperature")
        legendtitle <- "T"
+       
      }else if(input$var == "Salinity"){
+       
        df <- mb_stations %>% select(Station,Lat,Lon,ID)
+       
        #Get values for surface or bottom
        if(input$colorby == "Surface") df$varmean <- mb_stations$Ssm
        if(input$colorby == "Bottom") df$varmean <- mb_stations$Sbm
+       
        #Maps data values to colors using viridis pallete
        pal <- colorNumeric(palette = "viridis", domain = c(0,35))
+       
        #For the legend
        groupname <- paste("Mean",input$colorby,"Salinity")
        legendtitle <- "S"
      }
+    
+    
     #Redraw the map
     leafletProxy("map", data = df) %>%
           clearShapes() %>%
@@ -71,27 +83,38 @@ function(input, output, session) {
 
   #If the map is clicked, make a plot
   observe({
+    
         event <- input$map_shape_click
+        
         #If nothing is clicked, do nothing.
         if (is.null(event)) return()
+        
         #Event id is a index that defines data and station name
         isolate({GetPlot(event$id)})
     })
 
+  
   #If the map is clicked, display Lat/Lon for location
   observe({
+    
         #Event id is a index that defines data and station name
         event <- input$map_shape_click
+        
         isolate({
              #GetIndicies returns lat/lon
              gid <- GetIndicies(event$id)
              content <- as.character(HTML(sprintf("Lat = %01.2f Lon = %01.2f",gid$lat,gid$lon)))
-           })
+         })
+        
          if (is.null(event)) content <- "None Selected"
+        
          #Display the location's lat/lon
          output$plotwin <- renderUI({HTML(content)})
+         
       return()
-    })#End observe
+         
+    })
+  #End observe
 
   
   #---Functions-------
@@ -103,6 +126,7 @@ function(input, output, session) {
     which <- list("lon"=whichlon,"lat"=whichlat)
     return(which)
   }      
+  
   
   #Function to make the plot 
   GetPlot <- function(inode) { 
